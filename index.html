@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Premium Monthly Habit Tracker">
+    <title>Habitify | Modern Tracker</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i>
+                <h1>Habitify</h1>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="icon-btn" title="Data Options">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" id="exportData"><i class="fa-solid fa-file-export"></i> Export JSON</a>
+                        <label for="importFile" class="import-label">
+                            <i class="fa-solid fa-file-import"></i> Import JSON
+                            <input type="file" id="importFile" accept=".json" hidden>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <section class="dashboard">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fa-solid fa-list-check"></i></div>
+                <div class="stat-info">
+                    <h3>Total Habits</h3>
+                    <p id="totalHabits">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon emerald"><i class="fa-solid fa-check-double"></i></div>
+                <div class="stat-info">
+                    <h3>Completed Today</h3>
+                    <p id="completedToday">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fa-solid fa-fire"></i></div>
+                <div class="stat-info">
+                    <h3>Current Streak</h3>
+                    <p id="currentStreak">0 Days</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fa-solid fa-trophy"></i></div>
+                <div class="stat-info">
+                    <h3>Success Rate</h3>
+                    <p id="successRate">0%</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quote Section -->
+        <div class="quote-section">
+            <p id="motivationalQuote">"Small disciplines repeated with consistency every day lead to great achievements gained slowly over time."</p>
+        </div>
+
+        <!-- Main Controls -->
+        <section class="controls">
+            <div class="month-nav">
+                <button id="prevMonth" class="icon-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 id="currentMonthYear">October 2023</h2>
+                <button id="nextMonth" class="icon-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            
+            <div class="action-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchHabit" placeholder="Search habits...">
+                </div>
+                <button id="addHabitBtn" class="btn primary">
+                    <i class="fa-solid fa-plus"></i> New Habit
+                </button>
+            </div>
+        </section>
+
+        <!-- Habit Grid -->
+        <section class="grid-section">
+            <div class="habit-grid-container">
+                <table id="habitTable">
+                    <thead>
+                        <tr id="dateHeaders">
+                            <th class="sticky-col">Habit</th>
+                            <!-- Days will be injected here via JS -->
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="habitBody">
+                        <!-- Habits will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>Daily Score (Last 7 Days)</h3>
+                <canvas id="weeklyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Monthly Progress</h3>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add/Edit Habit Modal -->
+    <div id="habitModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Habit</h2>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="habitForm">
+                <input type="hidden" id="habitId">
+                <div class="form-group">
+                    <label>Habit Name</label>
+                    <input type="text" id="habitNameInput" required placeholder="e.g., Read 20 pages">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="habitCategory">
+                        <option value="Health">Health 🏃‍♂️</option>
+                        <option value="Work">Work 💼</option>
+                        <option value="Learning">Learning 📚</option>
+                        <option value="Mindfulness">Mindfulness 🧘‍♂️</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Color Accent</label>
+                    <div class="color-picker">
+                        <input type="radio" name="habitColor" value="#3b82f6" checked style="--c: #3b82f6;">
+                        <input type="radio" name="habitColor" value="#10b981" style="--c: #10b981;">
+                        <input type="radio" name="habitColor" value="#8b5cf6" style="--c: #8b5cf6;">
+                        <input type="radio" name="habitColor" value="#f59e0b" style="--c: #f59e0b;">
+                        <input type="radio" name="habitColor" value="#ef4444" style="--c: #ef4444;">
+                    </div>
+                </div>
+                <button type="submit" class="btn primary full-width">Save Habit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Action successful</span>
+        <button id="undoBtn" class="btn small outline hidden">Undo</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
